@@ -18,6 +18,8 @@ Status : @status <br />
 Duration : @Duration <br />
 Actual Http requests sent : @Counter <br />
 Actual Requests sent per second : @ActualrequestsPerSecond <br />
+For loop pass count : @looppasscount <br />
+<br />
 
 
 
@@ -32,19 +34,23 @@ Actual Requests sent per second : @ActualrequestsPerSecond <br />
     private int Counter = 0;
     private int seconds = 0;
     private float ActualrequestsPerSecond = 10;
+    private int loopcount = 0;
+    private int looppasscount = 0;
     private async Task StartLoad()
     {
         running = true;
         status = "Load generation started.";
         StartTime = DateTime.Now;
         Counter = 0;
+        loopcount = 0;
         while (running)
         {
             for (int i = 0; i < requestsPerSecond; i++)
             {
                 var url = Nav.BaseUri + "ping";
                 await Http.GetAsync(url);
-                Counter = Counter + i;
+                Counter = Counter + 1;
+                loopcount = loopcount + 1;
                 //_ = await Http.GetAsync("/ping"); // hits your own app
             }
 
@@ -66,6 +72,8 @@ Actual Requests sent per second : @ActualrequestsPerSecond <br />
         TimeSpan diff1 = EndTime - StartTime;
         seconds = Convert.ToInt32(diff1.TotalSeconds);
         ActualrequestsPerSecond = Counter / seconds;
+        looppasscount = loopcount / requestsPerSecond;
+
         return Task.CompletedTask;
     }
 
@@ -77,6 +85,8 @@ Actual Requests sent per second : @ActualrequestsPerSecond <br />
         requestsPerSecond = 10;
         status = "";
         ActualrequestsPerSecond = 0;
+        loopcount = 0;
+        looppasscount = 0;
         return Task.CompletedTask;
     }
 
