@@ -1,0 +1,84 @@
+﻿@page "/LearnBlazor/LoadTest"
+
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+
+<h3>Http Load Test</h3>
+
+<p>Set the Load testing spec : Requests per second: @requestsPerSecond</p>
+
+<input type="range" min="1" max="2000" @bind="requestsPerSecond" />
+
+<button @onclick="StartLoad">Start Load</button>
+<button @onclick="StopLoad">Stop Load</button>
+<button @onclick="Reset">Reset</button><br /><br />
+
+Status : @status <br />
+Duration : @Duration <br />
+Actual Http requests sent : @Counter <br />
+Actual Requests sent per second : @ActualrequestsPerSecond <br />
+
+
+
+@code {
+    private int requestsPerSecond = 10;
+    private bool running = false;
+    private string status = "";
+    private DateTime StartTime;
+    private DateTime EndTime; 
+    private string Duration;
+    private int totalprocessed;
+    private int Counter = 0;
+    private int seconds = 0;
+    private float ActualrequestsPerSecond = 10;
+    private async Task StartLoad()
+    {
+        running = true;
+        status = "Load generation started.";
+        StartTime = DateTime.Now;
+        Counter = 0;
+        while (running)
+        {
+            for (int i = 0; i < requestsPerSecond; i++)
+            {
+                var url = Nav.BaseUri + "ping";
+                await Http.GetAsync(url);
+                Counter = Counter + i;
+                //_ = await Http.GetAsync("/ping"); // hits your own app
+            }
+
+            await Task.Delay(1000);
+
+        }
+    }
+
+    private Task StopLoad()
+    {
+        running = false;
+        status = "Load generation stopped.";
+        EndTime = DateTime.Now;
+        var diff = EndTime - StartTime;
+
+        var formatted = $"{diff.Hours}h {diff.Minutes}m {diff.Seconds}s";
+
+        Duration = formatted.ToString();
+        TimeSpan diff1 = EndTime - StartTime;
+        seconds = Convert.ToInt32(diff1.TotalSeconds);
+        ActualrequestsPerSecond = Counter / seconds;
+        return Task.CompletedTask;
+    }
+
+    private Task Reset()
+    {
+
+        Counter = 0;
+        Duration = "";
+        requestsPerSecond = 10;
+        status = "";
+        ActualrequestsPerSecond = 0;
+        return Task.CompletedTask;
+    }
+
+
+}
