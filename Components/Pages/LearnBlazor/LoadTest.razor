@@ -1,4 +1,7 @@
 ﻿@page "/LearnBlazor/LoadTest"
+@using ApexCharts
+@using Models
+
 
 @inject HttpClient Http
 @inject NavigationManager Nav
@@ -18,7 +21,22 @@ Step 4: Review the computed capacity estimates, then select Reset to clear all t
 
 <p>Requests per second: @requestsPerSecond</p>
 
-<input type="range" class="load-slider" min="0" max="5000" step="500" list= "tickmarks" @bind="requestsPerSecond" /><br /><br />
+<input type="range" class="load-slider" min="0" max="5000" step="500" style="width: 400px" list= "tickmarks" @bind="requestsPerSecond" />
+<br />
+<br />
+<datalist id="tickmarks">
+    <option value="0"></option>
+    <option value="500"></option>
+    <option value="1000"></option>
+    <option value="1500"></option>
+    <option value="2000"></option>
+    <option value="2500"></option>
+    <option value="3000"></option>
+    <option value="3500"></option>
+    <option value="4000"></option>
+    <option value="4500"></option>
+    <option value="5000"></option>
+</datalist>
 
 
 <button class="btn btn-primary" @onclick="StartLoad">Start Load</button>
@@ -39,10 +57,8 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
 
 <br />
 
-
-
 @code {
-    private int requestsPerSecond = 10;
+    private int requestsPerSecond = 0;
     private bool running = false;
     private string status = "";
     private DateTime StartTime;
@@ -55,6 +71,8 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
     private int loopcount = 0;
     private int looppasscount = 0;
     private int stoploadcounter = 0;
+   
+
 
     private async Task StartLoad()
     {
@@ -102,7 +120,7 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
 
         Counter = 0;
         Duration = "";
-        requestsPerSecond = 10;
+        requestsPerSecond = 0;
         status = "";
         ActualrequestsPerSecond = 0;
         loopcount = 0;
@@ -113,3 +131,103 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
 
 
 }
+
+
+
+
+@code {
+
+    private List<LoadPoint> points = new()
+    {
+        new LoadPoint { X = 1, Y = 10 },
+        new LoadPoint { X = 2, Y = 25 },
+        new LoadPoint { X = 3, Y = 15 },
+        new LoadPoint { X = 4, Y = 30 }
+    };
+
+    private int MinX;
+    private int MaxX;
+    private int MinY;
+    private int MaxY;
+
+    private ApexChartOptions<LoadPoint> chartOptions;
+    private void UpdateAxisRanges()
+    {
+        MinX = points.Min(p => p.X);
+        MaxX = points.Max(p => p.X);
+        MinY = points.Min(p => p.Y);
+        MaxY = points.Max(p => p.Y);
+    }
+    
+    protected override void OnInitialized() 
+    { 
+        UpdateAxisRanges(); 
+        chartOptions = new ApexChartOptions<LoadPoint> 
+        {
+            Xaxis = new XAxis 
+            { Type = XAxisType.Numeric, 
+                Min = MinX, 
+                Max = MaxX, 
+                Labels = new XAxisLabels { Formatter = "function(value) { return value; }"
+            } 
+        },
+            Yaxis = new List<YAxis> 
+            { 
+                new YAxis 
+                { 
+                    Min = MinY, 
+                    Max = MaxY, 
+                    Labels = new YAxisLabels 
+                    { 
+                        Formatter = "function(value) { return value % 5 === 0 ? value : ''; }" 
+                    } 
+                } 
+            } 
+        };
+    }
+}
+    @* ApexChartOptions<LoadPoint> chartOptions = new()
+    {
+        Xaxis = new XAxis
+        {
+            Type = XAxisType.Numeric,   // THIS IS THE FIX
+            
+            Min = MinX,
+            Max = MaxX,
+            
+
+            TickAmount = 1,     // optional: number of ticks
+            Labels = new XAxisLabels
+            {
+                Formatter = "function(value) { return value; }"
+            }
+        },
+        Yaxis = new List<YAxis> { 
+            new YAxis { 
+            
+            TickAmount = 5, // optional: number of ticks 
+            Labels = new YAxisLabels { Formatter = "function(value) { return value % 5 === 0 ? value : ''; }" } } }
+    };
+} @**@
+
+
+
+<ApexChart TItem="LoadPoint" Options="chartOptions">
+    
+    <ApexPointSeries TItem="LoadPoint"
+                     Name="Sample Line"
+                     Items="points"
+                     XValue="@(p => p.X)"
+                     YValue="@(p => p.Y)" >
+    </ApexPointSeries>                 
+</ApexChart>
+
+
+
+
+
+
+
+
+
+
