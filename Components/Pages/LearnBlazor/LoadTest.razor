@@ -18,7 +18,7 @@ Step 4: Review the computed capacity estimates, then select Reset to clear all t
 
 <p>Requests per second: @requestsPerSecond</p>
 
-<input type="range" class="load-slider::-webkit-slider-runnable-track" min="1" max="3000" @bind="requestsPerSecond" /><br /><br />
+<input type="range" class="load-slider" min="0" max="5000" step="500" list= "tickmarks" @bind="requestsPerSecond" /><br /><br />
 
 
 <button class="btn btn-primary" @onclick="StartLoad">Start Load</button>

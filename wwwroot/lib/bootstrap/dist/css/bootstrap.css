@@ -2553,6 +2553,52 @@ textarea.form-control-lg {
   border-color: transparent;
   border-radius: 1rem;
 }
+.load-slider {
+    width: 800px; /* Increase slider length */
+    height: 6px; /* Track thickness */
+    -webkit-appearance: none;
+    appearance: none;
+    background: #d0d0d0; /* Track background */
+    border-radius: 4px;
+    outline: none;
+}
+
+/* Track (WebKit browsers) */
+.load-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    background: linear-gradient(to right, #0078D4, #00A4EF); /* Azure blue gradient */
+    border-radius: 4px;
+}
+
+/* Thumb (WebKit browsers) */
+.load-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #005A9E; /* Thumb color */
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -7px; /* Centers thumb on track */
+}
+
+/* Firefox */
+.load-slider::-moz-range-track {
+    height: 6px;
+    background: linear-gradient(to right, #0078D4, #00A4EF);
+    border-radius: 4px;
+}
+
+.load-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #005A9E;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+
 .form-range::-moz-range-thumb {
   width: 1rem;
   height: 1rem;
