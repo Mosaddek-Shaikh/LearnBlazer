@@ -1,13 +1,14 @@
 ﻿@page "/LearnBlazor/LoadTest"
 @using ApexCharts
 @using Models
+@using System.Collections
 
 
 @inject HttpClient Http
 @inject NavigationManager Nav
 
 
-<h3>HTTP Performance and Capacity Testing</h3>
+<h3>HTTP Performance and Capacity Evaluation</h3>
 
 INSTRUCTION : 
 The objective is to apply varying loads of HTTP requests per second to evaluate the worker’s capacity to process them. Repeat the test at 500, 1000, 1500, and 2000 requests per second, and observe how the actual request rate behaves. <br /><br />
@@ -43,6 +44,7 @@ Step 4: Review the computed capacity estimates, then select Reset to clear all t
 <button class="btn btn-danger" @onclick="StopLoad">Stop Load</button>
 <button class="btn btn-success" @onclick="Reset">Reset</button><br /><br />
 
+
 <br />
 <h3> Performance Metrics </h3>
 <br />
@@ -52,12 +54,34 @@ Actual Http requests sent : @Counter <br />
 Actual Requests sent per second : @ActualrequestsPerSecond <br /><br />
 
 <h3> Capacity Estimation </h3>
-Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) : 
-@* For loop pass count : @looppasscount <br /> *@
+@*Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) : *@ 
+ For loop pass count : @looppasscount <br /> 
 
 <br />
 
+<button class="btn btn-success" @onclick="CreateRPSChartData">Create RPS vs Load Chart</button>
+<br />
+<br />
+
+<ApexChart TItem="LoadPoint" Options="chartOptions" @ref="chart">
+    
+    <ApexPointSeries TItem="LoadPoint"
+                     Name="Sample Line"
+                     Items="points"
+                     SeriesType="SeriesType.Line"
+                     XValue="@(p => p.X)"
+                     YValue="@(p => p.Y)"
+                     ShowDataLabels
+                     
+    >
+    </ApexPointSeries>
+</ApexChart>
+
+
+
+
 @code {
+    [Inject] public IApexChartService ApexChartService { get; set; }
     private int requestsPerSecond = 0;
     private bool running = false;
     private string status = "";
@@ -67,11 +91,15 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
     private int totalprocessed;
     private int Counter = 0;
     private int seconds = 0;
-    private float ActualrequestsPerSecond = 10;
+    private float ActualrequestsPerSecond = 0;
     private int loopcount = 0;
     private int looppasscount = 0;
     private int stoploadcounter = 0;
-   
+    private List<int> Persecond = new List<int>();
+    private List<int> RPS = new List<int>();
+    private int secondcounter = 0; 
+    private ApexChartOptions<LoadPoint> chartOptions;
+
 
 
     private async Task StartLoad()
@@ -81,6 +109,7 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
         StartTime = DateTime.Now;
         Counter = 0;
         loopcount = 0;
+        secondcounter = 0;
         while (running)
         {
             for (int i = 0; i < requestsPerSecond; i++)
@@ -110,6 +139,8 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
         TimeSpan diff1 = EndTime - StartTime;
         seconds = Convert.ToInt32(diff1.TotalSeconds);
         ActualrequestsPerSecond = Counter / seconds;
+        Persecond.Add(requestsPerSecond);
+        RPS.Add((int) ActualrequestsPerSecond);
         looppasscount = loopcount / requestsPerSecond;
         stoploadcounter = stoploadcounter + 1;
         return Task.CompletedTask;
@@ -126,32 +157,161 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
         loopcount = 0;
         looppasscount = 0;
         stoploadcounter = 0;
+        secondcounter = 0;
         return Task.CompletedTask;
     }
+    private int MinX;
+    private int MaxX;
+    private int MinY;
+    private int MaxY;
+
+
+
+    private ApexChart<LoadPoint> chart; 
+    private List<LoadPoint> points = new();
+
+  
+
+
+    private async Task CreateRPSChartData()
+    {
+        points = new List<LoadPoint>();
+
+        for (int i = 0; i < Persecond.Count && i < RPS.Count; i++)
+        {
+            points.Add(new LoadPoint
+            {
+                X = Persecond[i],
+                Y = RPS[i]
+            });
+        }
+        if (points.Count == 0) return;
+
+
+        MinX = points.Min(p => p.X);
+        MaxX = points.Max(p => p.X);
+        MinY = points.Min(p => p.Y);
+        MaxY = points.Max(p => p.Y);
+
+
+     
+
+
+        @*OnInitialized();*@
+        chartOptions = new ApexChartOptions<LoadPoint>
+        {
+            Chart = new Chart
+            {
+                Toolbar = new Toolbar
+                {
+                    Show = false
+                },
+                DropShadow = new DropShadow
+                {
+                    Enabled = true,
+                    Color = "",
+                    Top = 18,
+                    Left = 7,
+                    Blur = 10,
+                    Opacity = 0.2d
+                }
+            },
+            
+            DataLabels = new ApexCharts.DataLabels
+            {
+                Enabled = true, 
+                Formatter = @" function (val, opts) { var point = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex]; return point.x + ', ' + val; }",
+                OffsetY = -6d
+            },
+            Grid = new Grid
+            {
+                BorderColor = "#e7e7e7",
+                Row = new GridRow
+                {
+                    Colors = new List<string> { "#f3f3f3", "transparent" },
+                    Opacity = 0.5d
+                }
+            },
+
+            Colors = new List<string> { "#77B6EA", "#545454" },
+            Markers = new Markers { Shape = MarkerShape.Circle, Size = 5, FillOpacity = new Opacity(0.8d) },
+            Stroke = new Stroke { Curve = Curve.Smooth },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Top,
+                HorizontalAlign = ApexCharts.Align.Right,
+                Floating = true,
+                OffsetX = -5,
+                OffsetY = -25
+            },
+
+
+
+          Xaxis = new XAxis
+          {
+              Type = XAxisType.Numeric,
+              Min = MinX,
+              Max = MaxX,
+              Labels = new XAxisLabels
+              {
+                  Formatter = "function(value) { return value % 500 === 0 ? value : ''; }"
+              }
+          },
+                Yaxis = new List<YAxis>
+            {
+                new YAxis
+                {
+                    Min = MinY,
+                    Max = MaxY,
+                    Labels = new YAxisLabels
+                    {
+                        Formatter = "function(value) { return value % 50 === 0 ? value : ''; }"
+                    }
+                }
+            }
+        };
+       
+        
+
+        await chart.UpdateSeriesAsync();
+        StateHasChanged();
+    }
+
+   
+
+    
+
+
 
 
 }
+        @*await chart.UpdateOptionsAsync(chartOptions);*@ 
+        
+       
+        @*List<LoadPoint> points = Persecond.Zip(RPS, (x, y) => new LoadPoint { X = x, Y = y }).ToList();*@
+       
+    
+    
 
 
-
-
-@code {
-
-    private List<LoadPoint> points = new()
+    @*private List<LoadPoint> points = new()
     {
         new LoadPoint { X = 1, Y = 10 },
         new LoadPoint { X = 2, Y = 25 },
         new LoadPoint { X = 3, Y = 15 },
         new LoadPoint { X = 4, Y = 30 }
     };
+    *@  @*private List<LoadPoint> points = new()
+    {
+        new LoadPoint { X = 1, Y = 10 },
+        new LoadPoint { X = 2, Y = 25 },
+        new LoadPoint { X = 3, Y = 15 },
+        new LoadPoint { X = 4, Y = 30 }
+    };
+    
 
-    private int MinX;
-    private int MaxX;
-    private int MinY;
-    private int MaxY;
-
-    private ApexChartOptions<LoadPoint> chartOptions;
-    private void UpdateAxisRanges()
+   
+   private void UpdateAxisRanges()
     {
         MinX = points.Min(p => p.X);
         MaxX = points.Max(p => p.X);
@@ -159,9 +319,12 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
         MaxY = points.Max(p => p.Y);
     }
     
+    
+ 
     protected override void OnInitialized() 
     { 
-        UpdateAxisRanges(); 
+
+        @*UpdateAxisRanges(); 
         chartOptions = new ApexChartOptions<LoadPoint> 
         {
             Xaxis = new XAxis 
@@ -184,43 +347,12 @@ Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) :
                 } 
             } 
         };
-    }
 }
-    @* ApexChartOptions<LoadPoint> chartOptions = new()
-    {
-        Xaxis = new XAxis
-        {
-            Type = XAxisType.Numeric,   // THIS IS THE FIX
-            
-            Min = MinX,
-            Max = MaxX,
-            
+*@  
 
-            TickAmount = 1,     // optional: number of ticks
-            Labels = new XAxisLabels
-            {
-                Formatter = "function(value) { return value; }"
-            }
-        },
-        Yaxis = new List<YAxis> { 
-            new YAxis { 
-            
-            TickAmount = 5, // optional: number of ticks 
-            Labels = new YAxisLabels { Formatter = "function(value) { return value % 5 === 0 ? value : ''; }" } } }
-    };
-} @**@
+ 
 
 
-
-<ApexChart TItem="LoadPoint" Options="chartOptions">
-    
-    <ApexPointSeries TItem="LoadPoint"
-                     Name="Sample Line"
-                     Items="points"
-                     XValue="@(p => p.X)"
-                     YValue="@(p => p.Y)" >
-    </ApexPointSeries>                 
-</ApexChart>
 
 
 
