@@ -41,6 +41,7 @@ Step 4: Review the computed capacity estimates, then select Reset to clear all t
 
 
 <button class="btn btn-primary" @onclick="StartLoad">Start Load</button>
+<button class="btn btn-secondary" @onclick="StepUp">Step Up 500 </button>
 <button class="btn btn-danger" @onclick="StopLoad">Stop Load</button>
 <button class="btn btn-success" @onclick="Reset">Reset</button><br /><br />
 
@@ -143,6 +144,28 @@ Actual Requests sent per second : @ActualrequestsPerSecond <br /><br />
         RPS.Add((int) ActualrequestsPerSecond);
         looppasscount = loopcount / requestsPerSecond;
         stoploadcounter = stoploadcounter + 1;
+        return Task.CompletedTask;
+    }
+
+
+    private Task StepUp()
+    {
+        running = true;
+        status = "Load stepping up 500.";
+        EndTime = DateTime.Now;
+        var diff = EndTime - StartTime;
+
+        var formatted = $"{diff.Hours}h {diff.Minutes}m {diff.Seconds}s";
+
+        Duration = formatted.ToString();
+        TimeSpan diff1 = EndTime - StartTime;
+        seconds = Convert.ToInt32(diff1.TotalSeconds);
+        ActualrequestsPerSecond = Counter / seconds;
+        Persecond.Add(requestsPerSecond);
+        RPS.Add((int)ActualrequestsPerSecond);
+        looppasscount = loopcount / requestsPerSecond;
+        stoploadcounter = stoploadcounter + 1;
+        requestsPerSecond = requestsPerSecond + 500;
         return Task.CompletedTask;
     }
 
