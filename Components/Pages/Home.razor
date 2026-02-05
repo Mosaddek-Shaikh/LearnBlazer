@@ -4,11 +4,13 @@
 
 <h1> Backend Scalability </h1>
 
-In general, the back‑end scalability of a web application primarily refers to compute scalability and data‑layer scalability. The purpose of this website is to demonstrate the horizontal scaling capabilities of Azure workers operating within the Azure App Service model.
 
-First, we walk through the capacity‑estimation process using HTTP requests per second as an indicator of a worker’s processing capability.
-Second, we examine how workers automatically scale out when HTTP load increases and traffic is distributed across multiple instances.
 
-Our environment is the Azure infrastructure, where networking, traffic flow, load balancers, and all other supporting Azure services operate as designed whenever a worker is provisioned according to the App Service Plan configuration. These underlying components are assumed to be in place and are not modified as part of this demonstration. Please follow the instructions on each page and enjoy the presentation.
+In general, the back‑end scalability of a web application refers primarily to compute scalability and data‑layer scalability. Compute scalability can be achieved either horizontally or vertically. Because the topic is broad, this demonstration focuses specifically on horizontal scaling, in which additional instances are provisioned to handle increased request volume and prevent performance bottlenecks.
+
+I begin by reviewing the capacity‑assessment process, using HTTP requests per second as an indicator of a worker’s processing capability. I then examine the logic and rules that govern automatic scaling in response to rising HTTP traffic.
+
+At a later time, I will illustrate the horizontal scaling capabilities of Azure workers operating within the Azure App Service model Or Azure Container App model. I am also open to other vendors to explore. The current environment consists of Azure infrastructure and render.com. 
 
 This website is for demonstration purposes only.
+

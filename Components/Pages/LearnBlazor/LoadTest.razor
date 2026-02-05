@@ -8,14 +8,15 @@
 @inject NavigationManager Nav
 
 
-<h3>HTTP Performance and Capacity Evaluation</h3>
+<h3>HTTP Performance and Capacity Assessment</h3>
 
-INSTRUCTION : 
+ 
 The objective is to apply varying loads of HTTP requests per second to evaluate the worker’s capacity to process them. Repeat the test at 500, 1000, 1500, and 2000 requests per second, and observe how the actual request rate behaves. <br /><br />
-Step 1: Drag the slider to approximately 500 requests per second. Click “Start Load”, and let it run for about one minute. <br />
-Step 2: Click on the "Stop Load" button and review the resulting performance metrics. <br />
-Step 3: Repeat Steps 1 and 2 using initial load levels of about 1000, 1500, and 2000 requests per second to evaluate scaling behavior under increasing load. <br />
-Step 4: Review the computed capacity estimates, then select Reset to clear all test data and prepare for the next run. <br /> <br /> <br />
+Step 1: Drag the slider to 500 tickmark and click “Start Load”, and let it run for about 4-5 minute. <br />
+Step 2: Click on the "Step Up 500" button, review the resulting performance metrics and wait about another 4-5 mins. <br />
+Step 3: Repeat Step 2 until you reach 7000 mark to evaluate scaling behavior under the maximum load. <br />
+Step 4: Review the computed capacity estimates, then select Reset to clear all test data and prepare for the next run. <br />
+Step 5: Click on the button "Create RPS VS Load Chart" and analyze the behaviour of RPS values.<br /> <br />
 
 
 
@@ -51,14 +52,14 @@ Step 4: Review the computed capacity estimates, then select Reset to clear all t
 
 
 <br />
-<h3> Performance Metrics </h3>
+<h3> Performance Assessment </h3>
 <br />
 Status : @status <br />
 Duration : @Duration <br />
 Actual Http requests sent : @Counter <br />
 Actual Requests sent per second : @ActualrequestsPerSecond <br /><br />
 
-<h3> Capacity Estimation </h3>
+<h3> Capacity Assessment </h3>
 @*Estimated Capacity of Http requests (Avg of last @stoploadcounter tests) : 
  For loop pass count : @looppasscount <br /> *@ 
 
